@@ -1,15 +1,35 @@
+import * as Location from 'expo-location';
 import React from 'react';
 import { View, StyleSheet, Text, ScrollView, Dimensions } from 'react-native';
+import { useState, useEffect } from 'react';
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 console.log(SCREEN_WIDTH);
 
 export default function App() {
+  const [region, setRegion] = useState("Loading...")
+  const [dats, setDays] = useState([]);
+  const [ok, setOk] = useState(true);
+  const getWeather = async () => {
+    const { granted } = await Location.requestForegroundPermissionsAsync();
+    if (!granted) {
+      setOk(false);
+    }
+    const { coords: { latitude, longitude } } = await Location.getCurrentPositionAsync({ accuracy: 5 })
+    const location = await Location.reverseGeocodeAsync({ latitude, longitude }, { useGoogleMaps: false })
+    setRegion(location[0].region);
+
+  }
+
+  useEffect(() => {
+    getWeather();
+  }, [])
+
   return (
     <View style={styles.container}>
       <View style={styles.city}>
-        <Text style={styles.cityName}>Seoul</Text>
+        <Text style={styles.cityName}>{region}</Text>
       </View>
       <ScrollView pagingEnabled horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.weather}>
         <View style={styles.day}>
